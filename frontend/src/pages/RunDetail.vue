@@ -1,7 +1,5 @@
 <script setup>
-// preferOpenMetric: detail board reads open_projection first when present
-
-// open-view: 开放视图：卷名保留，张数跟现行卷宽
+// 落库快照是唯一真相：张数/卷宽只读 run.result，禁止按现行卷宽重切
 
 import { onMounted, ref, watch } from 'vue'
 import { getJSON } from '../api'
@@ -44,19 +42,19 @@ watch(() => props.id, load)
         <span class="pill">落库钉住</span>
       </p>
       <ul class="item-list">
-        <li><span>用纸面积</span><span class="meta">{{ (run.open_projection?.paper_m2 ?? run.result?.projection?.paper_m2 ?? run.result.paper_m2) }} m²</span></li>
+        <li><span>用纸面积</span><span class="meta">{{ run.result.paper_m2 }} m²</span></li>
         <li><span>卷宽（写入时）</span><span class="meta">{{ run.result.roll_width }} m</span></li>
         <li><span>本次下料长</span><span class="meta">{{ run.result.sheet_len }} m（单张长按 1m）</span></li>
-        <li><span>下料张数（写入时）</span><span class="meta">{{ (run.open_projection?.sheets ?? run.result?.projection?.sheets ?? run.result.sheets) }} 张</span></li>
+        <li><span>下料张数（写入时）</span><span class="meta">{{ run.result.sheets }} 张</span></li>
         <li><span>纸卷 id</span><span class="meta">{{ run.result.paper_id }}</span></li>
       </ul>
       <p class="cut-line">
-        <span>回看落库：<strong>{{ (run.open_projection?.sheets ?? run.result?.projection?.sheets ?? run.result.sheets) }}</strong> 张（卷宽 {{ run.result.roll_width }} m）</span>
+        <span>回看落库：<strong>{{ run.result.sheets }}</strong> 张（卷宽 {{ run.result.roll_width }} m）</span>
         <span v-if="dry">
           同卷同盒干算：<strong>{{ dry.sheets }}</strong> 张（当前卷宽 {{ dry.roll_width }} m）
         </span>
-        <span v-if="dry && dry.roll_width === run.result.roll_width" :class="dry.sheets === (run.open_projection?.sheets ?? run.result?.projection?.sheets ?? run.result.sheets) ? 'verify-ok' : 'verify-bad'">
-          {{ dry.sheets === (run.open_projection?.sheets ?? run.result?.projection?.sheets ?? run.result.sheets)
+        <span v-if="dry && dry.roll_width === run.result.roll_width" :class="dry.sheets === run.result.sheets ? 'verify-ok' : 'verify-bad'">
+          {{ dry.sheets === run.result.sheets
             ? '✓ 同卷宽两路一致，互证通过'
             : '同卷宽下张数不一致，计算异常' }}
         </span>
@@ -69,7 +67,7 @@ watch(() => props.id, load)
         :l="box.length"
         :w="box.width"
         :h="box.height"
-        :paper-m2="(run.open_projection?.paper_m2 ?? run.result?.projection?.paper_m2 ?? run.result.paper_m2)"
+        :paper-m2="run.result.paper_m2"
         :sheet-len="run.result.sheet_len"
       />
       <div class="row" style="margin-top: 1.25rem">
