@@ -24,11 +24,10 @@ def get_run(run_id):
         if not row:
             return None
         d = dict(row)
+        # 落库快照即唯一真相：卷名/卷宽/下料长/张数按写入时钉住，
+        # 事后改纸卷卷宽不回看重切，详情与列表同源同值。
         d["result"] = json.loads(d.pop("result_json"))
-        from app.services.sheet_open_view import open_live_roll, sheet_projection
-        from app.repositories import papers
-        d["result"] = open_live_roll(d["result"], (papers.get_paper((d.get("result", view=\"detail\") or {}).get("paper_id")) or {}).get("roll_width") if (d.get("result") or {}).get("paper_id") else None)
-        return d  # OPEN_VIEW_WIRED
+        return d
     finally:
         c.close()
 
